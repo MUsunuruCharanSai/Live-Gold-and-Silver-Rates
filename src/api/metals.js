@@ -31,7 +31,7 @@ async function getText(url) {
 
 async function request(url) {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), 12000)
+  const timer = setTimeout(() => controller.abort(), 20000)
 
   try {
     const response = await fetch(url, { signal: controller.signal })
@@ -118,28 +118,58 @@ function buildSilverRates(perGram999, perOunce, extra = {}) {
   }
 }
 
+function lastChartValue(html, inputId, key) {
+  const match = html.match(new RegExp(`id=["']${inputId}["'][^>]*value="([^"]+)"`))
+  if (!match) return null
+
+  try {
+    const data = JSON.parse(match[1].replace(/&quot;/g, '"'))
+    const values = data[key]
+    if (Array.isArray(values) && values.length) {
+      return pickNumber(values[values.length - 1])
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
 function parseIndiaShopRates(html) {
-  // IBJA gold is published per 10 grams. Silver 999 is per 1 kg.
+  // Working days: gold AM/PM is per 10 grams, silver AM/PM is per 1 kg.
   const gold10g24k = readIbjaPmOrAm(html, 'lblGold999')
   const gold10g22k = readIbjaPmOrAm(html, 'lblGold916')
   const gold10g18k = readIbjaPmOrAm(html, 'lblGold750')
   const silverPerKg = readIbjaPmOrAm(html, 'lblSilver999')
 
-  const goldShop = gold10g24k
-    ? buildGoldRates(gold10g24k / 10, null, {
-      perGram22k: gold10g22k ? gold10g22k / 10 : null,
-      perGram18k: gold10g18k ? gold10g18k / 10 : null,
-      per10g: gold10g24k,
-      label: 'India shop rate',
+  // Holidays: IBJA hides AM/PM, but still shows last per-gram gold cards.
+  const goldGram24k = gold10g24k
+    ? gold10g24k / 10
+    : readIbjaValue(html, 'GoldRatesCompare999')
+  const goldGram22k = gold10g22k
+    ? gold10g22k / 10
+    : readIbjaValue(html, 'GoldRatesCompare916')
+  const goldGram18k = gold10g18k
+    ? gold10g18k / 10
+    : readIbjaValue(html, 'GoldRatesCompare750')
+  const silverKg = silverPerKg || lastChartValue(html, 'HdnSilver', 'silverRate')
+  const isHoliday = /id=["']lbl_Message["'][^>]*>\s*Holiday/i.test(html)
+
+  const goldShop = goldGram24k
+    ? buildGoldRates(goldGram24k, null, {
+      perGram22k: goldGram22k,
+      perGram18k: goldGram18k,
+      per10g: goldGram24k * 10,
+      label: isHoliday ? 'India shop rate (holiday)' : 'India shop rate',
       source: 'IBJA',
     })
     : { available: false, perGram: {} }
 
-  const silverGram = silverPerKg ? silverPerKg / 1000 : null
+  const silverGram = silverKg ? silverKg / 1000 : null
   const silverShop = silverGram
     ? buildSilverRates(silverGram, null, {
       per10g: silverGram * 10,
-      label: 'India shop rate',
+      label: isHoliday ? 'India shop rate (holiday)' : 'India shop rate',
       source: 'IBJA',
     })
     : { available: false, perGram: {} }
