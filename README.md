@@ -2,6 +2,8 @@
 
 Vite + React app for live gold and silver prices in INR, with quantity calculators.
 
+Live site: [https://live-gold-and-silver-rates.vercel.app/](https://live-gold-and-silver-rates.vercel.app/)
+
 ## Run it
 
 ```bash
