@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/api/spot/gold", "destination": "https://api.gold-api.com/price/XAU" },
+    { "source": "/api/spot/silver", "destination": "https://api.gold-api.com/price/XAG" },
+    { "source": "/api/fx", "destination": "https://open.er-api.com/v6/latest/USD" },
+    { "source": "/api/india-shop", "destination": "https://ibjarates.com/" }
+  ]
+}

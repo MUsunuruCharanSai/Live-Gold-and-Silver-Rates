@@ -1,18 +1,10 @@
 const TROY_OUNCE_IN_GRAMS = 31.1034768
-const useLocalProxy = import.meta.env.DEV
 
-const GOLD_SPOT_URL = useLocalProxy
-  ? '/api/spot/gold'
-  : (import.meta.env.VITE_GOLD_SPOT_URL || 'https://api.gold-api.com/price/XAU')
-const SILVER_SPOT_URL = useLocalProxy
-  ? '/api/spot/silver'
-  : (import.meta.env.VITE_SILVER_SPOT_URL || 'https://api.gold-api.com/price/XAG')
-const FX_URL = useLocalProxy
-  ? '/api/fx'
-  : (import.meta.env.VITE_FX_URL || 'https://open.er-api.com/v6/latest/USD')
-const INDIA_SHOP_URL = useLocalProxy
-  ? '/api/india-shop'
-  : (import.meta.env.VITE_INDIA_SHOP_URL || 'https://ibjarates.com/')
+// Same paths locally (Vite proxy) and on Vercel (vercel.json rewrites)
+const GOLD_SPOT_URL = '/api/spot/gold'
+const SILVER_SPOT_URL = '/api/spot/silver'
+const FX_URL = '/api/fx'
+const INDIA_SHOP_URL = '/api/india-shop'
 const CURRENCY = import.meta.env.VITE_CURRENCY || 'INR'
 
 export const GOLD_PURITIES = [
